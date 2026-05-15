@@ -6,6 +6,7 @@
 
 # Ignora dependencias locales
 
+
 .settings/
 
 # Ignora control de versiones y sistema de build
