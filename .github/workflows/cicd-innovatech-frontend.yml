@@ -1,0 +1,57 @@
+name: CI/CD Innovatech - Frontend
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "front_despacho/**"
+
+jobs:
+  build-push-deploy-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build imagen Frontend
+        run: |
+          cd front_despacho
+          docker build -t innovatechv1-frontend .
+
+      - name: Tag imagen Frontend
+        run: |
+          docker tag innovatechv1-frontend:latest ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
+
+      - name: Push imagen Frontend
+        run: |
+          docker push ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
+
+      - name: Deploy Frontend vía SSM
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_FRONTEND_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy innovatechv1-frontend" \
+            --parameters '{
+              "commands":[
+                "set -e",
+                "aws ecr get-login-password --region '${{ secrets.AWS_REGION }}' | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}",
+                "docker pull ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest",
+                "docker stop innovatechv1-frontend || true",
+                "docker rm innovatechv1-frontend || true",
+                "docker run -d --name innovatechv1-frontend --restart always -p 80:80 ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest"
+              ]
+            }' \
+            --output text
