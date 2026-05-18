@@ -6,35 +6,34 @@ export const FormCierreDespacho = ({ despacho, onClose }) => {
   const { register, handleSubmit } = useForm();
 
   const onSubmit = async (data) => {
-    console.log("onSubmit ejecutado");
     const jsonData = {
-      intento: data.intento,
-      despachado: data.despachado,
+      intento: Number(data.intento),
+      despachado: data.despachado === "true",
     };
-
-    console.log("Datos del formulario:", jsonData);
 
     try {
       await axios.put(
-        `http://192.168.320/api/v1/despachos/${despacho.idDespacho}`,
+        `/api/despachos/api/v1/despachos/${despacho.idDespacho}`,
         jsonData,
         {
-          headers:{
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-      }
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
         }
       );
+
       Swal.fire({
         title: "Despacho modificado 🛻!",
         text: "El despacho ha sido modificado exitosamente",
         icon: "success",
         confirmButtonText: "Aceptar",
       });
+
+      onClose();
     } catch (error) {
       console.error("Error en la solicitud:", error);
     }
-    onClose();
   };
 
   return (
@@ -46,79 +45,85 @@ export const FormCierreDespacho = ({ despacho, onClose }) => {
         <div className="mx-auto text-3xl font-bold mb-10 text-teal-600">
           Editar y cierre de despacho
         </div>
+
         <div className="mb-5">
           <label className="block font-bold mb-2">ID despacho</label>
           <input
-            disabled={true}
+            disabled
             type="text"
-            placeholder="Ingresa fecha de despacho"
             className="border border-gray-300 rounded-lg block w-full p-1 text-slate-400"
             value={despacho.idDespacho}
           />
         </div>
+
         <div className="mb-5">
           <label className="block font-bold mb-2">Fecha despacho</label>
           <input
             type="date"
-            placeholder="Elige patente de camión"
             className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
             value={despacho.fechaDespacho}
-            disabled={true}
+            disabled
           />
         </div>
+
         <div className="mb-5">
           <label className="block font-bold mb-2">Patente Camión</label>
           <input
             type="text"
-            disabled={true}
+            disabled
             value={despacho.patenteCamion}
             className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
           />
         </div>
+
         <div className="mb-5">
           <label className="block font-bold mb-2">Intentos de entrega</label>
           <input
             type="number"
             defaultValue={despacho.intento}
-            className="border border-gray-300 rounded-lg block w-full  p-1"
+            className="border border-gray-300 rounded-lg block w-full p-1"
             {...register("intento", { required: true })}
           />
         </div>
+
         <div className="mb-5">
           <label className="block font-bold mb-2">Despacho entregado</label>
           <select
-            defaultValue={false}
-            className="border border-gray-300 rounded-lg block w-full  p-1"
+            defaultValue={String(despacho.despachado)}
+            className="border border-gray-300 rounded-lg block w-full p-1"
             {...register("despachado", { required: true })}
           >
-            <option value={false}>Despacho abierto</option>
-            <option value={true}>Cerrar despacho</option>
+            <option value="false">Despacho abierto</option>
+            <option value="true">Cerrar despacho</option>
           </select>
         </div>
+
         <div className="mb-5">
           <label className="block font-bold mb-2">ID Compra</label>
           <input
             type="text"
             className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
-            disabled={true}
+            disabled
             value={despacho.idCompra}
           />
         </div>
+
         <div className="mb-5">
           <label className="block font-bold mb-2">Dirección Compra</label>
           <input
             type="text"
             className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
-            disabled={true}
+            disabled
             value={despacho.direccionCompra}
           />
         </div>
+
         <div className="mb-5">
           <label className="block font-bold mb-2">Valor Compra</label>
           <input
             type="text"
             className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
-            disabled={true}
+            disabled
             value={despacho.valorCompra}
           />
         </div>

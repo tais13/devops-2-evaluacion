@@ -6,12 +6,11 @@ export const FormDespacho = ({ venta, onClose }) => {
   const { register, handleSubmit } = useForm();
 
   const onSubmit = async (data) => {
-    console.log("onSubmit ejecutado");
     const jsonData = {
       fechaDespacho: data.fechaDespacho,
       patenteCamion: data.patenteCamion,
       intento: 0,
-      entregado: false,
+      despachado: false,
       idCompra: venta.idVenta,
       direccionCompra: venta.direccionCompra,
       valorCompra: venta.valorCompra,
@@ -21,36 +20,38 @@ export const FormDespacho = ({ venta, onClose }) => {
       despachoGenerado: true,
     };
 
-    console.log("Datos del formulario:", jsonData);
-
     try {
       await axios.put(
-        `http://192.168.30/api/v1/ventas/${venta.idVenta}`,
+        `/api/ventas/api/v1/ventas/${venta.idVenta}`,
         jsonDataSales,
         {
-          headers:{
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-      }
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
         }
       );
-      await axios.post("http://192.168.320/api/v1/despachos", jsonData, {
-        headers:{
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-    }
+
+      await axios.post(`/api/despachos/api/v1/despachos`, jsonData, {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
       });
+
       Swal.fire({
         title: "Despacho registrado 🛻!",
         text: "El despacho ha sido generado con éxito en la base de datos",
         icon: "success",
         confirmButtonText: "Aceptar",
       });
+
+      onClose();
     } catch (error) {
       console.error("Error en la solicitud:", error);
     }
-    onClose();
   };
+
   return (
     <>
       <form
@@ -60,51 +61,52 @@ export const FormDespacho = ({ venta, onClose }) => {
         <div className="mx-auto text-3xl font-bold mb-10 text-teal-600">
           Ingreso de orden de despacho
         </div>
+
         <div className="mb-5">
           <label className="block font-bold mb-2">Fecha de despacho</label>
           <input
             type="date"
-            placeholder="Ingresa fecha de despacho"
             className="border border-gray-300 rounded-lg block w-full p-1"
             {...register("fechaDespacho", { required: true })}
           />
         </div>
+
         <div className="mb-5">
           <label className="block font-bold mb-2">Patente de camión</label>
           <input
             type="text"
-            placeholder="Elige patente de camión"
             className="border border-gray-300 rounded-lg block w-full p-1"
             {...register("patenteCamion", { required: true })}
           />
         </div>
+
         <div className="mb-5">
-          <label className="block font-bold mb-2">
-            Orden de compra asociado
-          </label>
+          <label className="block font-bold mb-2">Orden de compra asociado</label>
           <input
             type="number"
-            disabled={true}
+            disabled
             value={venta.idVenta}
             className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
           />
         </div>
+
         <div className="mb-5">
           <label className="block font-bold mb-2">Dirección de entrega</label>
           <input
             type="text"
-            disabled={true}
+            disabled
             value={venta.direccionCompra}
             className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
           />
         </div>
+
         <div className="mb-5">
           <label className="block font-bold mb-2">Valor de compra</label>
           <input
             type="number"
             value={venta.valorCompra}
             className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
-            disabled={true}
+            disabled
           />
         </div>
 
